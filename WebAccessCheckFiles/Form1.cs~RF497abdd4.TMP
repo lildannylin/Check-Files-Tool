@@ -1,0 +1,90 @@
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+using System.IO;
+
+using MetroFramework;
+using MetroFramework.Controls;
+using MetroFramework.Forms;
+using Microsoft.Win32;
+
+using MadMilkman.Ini;
+
+namespace WebAccessCheckFiles
+{
+    public partial class Form1 : MetroForm
+    {
+
+        string appPath = System.IO.Path.GetDirectoryName(Application.ExecutablePath);
+
+        CommonBase baseObj = new CommonBase();
+
+        Transfer transObj = new Transfer();
+
+        IniFile ini = new IniFile();
+
+        public Form1()
+        {
+            InitializeComponent();
+
+            InitializeLocal();
+        }
+
+        void InitializeLocal() {
+            var filesInfo = new DirectoryInfo(appPath).GetFiles("*.*");
+
+            string checksum = string.Empty;
+
+            foreach (var file in filesInfo)
+            {
+                checksum = transObj.GetMD5HashFromFile(appPath + "/" + file);
+
+                SetupIniIP.IniWriteValue("Node", file.Name, checksum, CommonBase.szIniFileName);
+
+                baseObj.szLocalFiles.Add(file.Name);
+                baseObj.szLocalChecksum.Add(checksum);
+
+                listBoxStandard.Items.Add(file.Name);
+            }
+        }
+        private void metroButtonTest_Click(object sender, EventArgs e)
+        {
+        }
+
+        private void metroButtonBrowse_Click(object sender, EventArgs e)
+        {
+            DialogResult result = openFileDialog1.ShowDialog(); // Show the dialog.
+            if (result == DialogResult.OK) // Test result.
+            {
+                listBoxStandard.Items.Clear();
+
+                string file = openFileDialog1.FileName;
+                try
+                {
+                    ini.Load(file);
+
+                    foreach (IniSection section in ini.Sections)
+                    {
+                        foreach (IniKey key in section.Keys)
+                        {
+                            string sectionName = section.Name;
+                            string keyName = key.Name;
+                            string keyValue = key.Value;
+
+                            listBoxStandard.Items.Add(keyName);
+                        }
+                    }
+                }
+                catch (IOException)
+                {
+                }
+            }
+        }
+    }
+}

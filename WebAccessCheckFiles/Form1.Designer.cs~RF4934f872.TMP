@@ -1,0 +1,79 @@
+﻿namespace WebAccessCheckFiles
+{
+    partial class Form1
+    {
+        /// <summary>
+        /// 設計工具所需的變數。
+        /// </summary>
+        private System.ComponentModel.IContainer components = null;
+
+        /// <summary>
+        /// 清除任何使用中的資源。
+        /// </summary>
+        /// <param name="disposing">如果應該處置受控資源則為 true，否則為 false。</param>
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing && (components != null))
+            {
+                components.Dispose();
+            }
+            base.Dispose(disposing);
+        }
+
+        #region Windows Form 設計工具產生的程式碼
+
+        /// <summary>
+        /// 此為設計工具支援所需的方法 - 請勿使用程式碼編輯器修改
+        /// 這個方法的內容。
+        /// </summary>
+        private void InitializeComponent()
+        {
+            this.metroButtonTest = new MetroFramework.Controls.MetroButton();
+            this.metroButtonBrowse = new MetroFramework.Controls.MetroButton();
+            this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
+            this.SuspendLayout();
+            // 
+            // metroButtonTest
+            // 
+            this.metroButtonTest.Location = new System.Drawing.Point(8, 437);
+            this.metroButtonTest.Name = "metroButtonTest";
+            this.metroButtonTest.Size = new System.Drawing.Size(166, 23);
+            this.metroButtonTest.TabIndex = 0;
+            this.metroButtonTest.Text = "Test";
+            this.metroButtonTest.UseSelectable = true;
+            this.metroButtonTest.Click += new System.EventHandler(this.metroButtonTest_Click);
+            // 
+            // metroButtonBrowse
+            // 
+            this.metroButtonBrowse.Location = new System.Drawing.Point(23, 63);
+            this.metroButtonBrowse.Name = "metroButtonBrowse";
+            this.metroButtonBrowse.Size = new System.Drawing.Size(98, 30);
+            this.metroButtonBrowse.TabIndex = 1;
+            this.metroButtonBrowse.Text = "Browse";
+            this.metroButtonBrowse.UseSelectable = true;
+            this.metroButtonBrowse.Click += new System.EventHandler(this.metroButtonBrowse_Click);
+            // 
+            // openFileDialog1
+            // 
+            this.openFileDialog1.FileName = "openFileDialog1";
+            // 
+            // Form1
+            // 
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.ClientSize = new System.Drawing.Size(660, 469);
+            this.Controls.Add(this.metroButtonBrowse);
+            this.Controls.Add(this.metroButtonTest);
+            this.Name = "Form1";
+            this.Text = "Form1";
+            this.ResumeLayout(false);
+
+        }
+
+        #endregion
+        private MetroFramework.Controls.MetroButton metroButtonTest;
+        private MetroFramework.Controls.MetroButton metroButtonBrowse;
+        private System.Windows.Forms.OpenFileDialog openFileDialog1;
+    }
+}
+

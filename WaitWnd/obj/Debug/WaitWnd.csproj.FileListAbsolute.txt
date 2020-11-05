@@ -1,0 +1,8 @@
+C:\Users\jeremy.li\Downloads\WaitforWnd_Sources\WaitforWnd_Sources\WaitWnd\bin\Debug\WaitWnd.dll
+C:\Users\jeremy.li\Downloads\WaitforWnd_Sources\WaitforWnd_Sources\WaitWnd\bin\Debug\WaitWnd.pdb
+C:\Users\jeremy.li\Downloads\WaitforWnd_Sources\WaitforWnd_Sources\WaitWnd\obj\Debug\WaitWnd.Resource1.resources
+C:\Users\jeremy.li\Downloads\WaitforWnd_Sources\WaitforWnd_Sources\WaitWnd\obj\Debug\WaitWnd.WaitForm.resources
+C:\Users\jeremy.li\Downloads\WaitforWnd_Sources\WaitforWnd_Sources\WaitWnd\obj\Debug\WaitWnd.csproj.GenerateResource.cache
+C:\Users\jeremy.li\Downloads\WaitforWnd_Sources\WaitforWnd_Sources\WaitWnd\obj\Debug\WaitWnd.csproj.CoreCompileInputs.cache
+C:\Users\jeremy.li\Downloads\WaitforWnd_Sources\WaitforWnd_Sources\WaitWnd\obj\Debug\WaitWnd.dll
+C:\Users\jeremy.li\Downloads\WaitforWnd_Sources\WaitforWnd_Sources\WaitWnd\obj\Debug\WaitWnd.pdb

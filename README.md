@@ -1,0 +1,1 @@
+![image](https://github.com/lildannylin/CheckFileTool/blob/master/Record/6uw4g-l4avv.gif)

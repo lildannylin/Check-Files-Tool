@@ -1,0 +1,362 @@
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+
+using System.Threading;
+
+using System.Threading.Tasks;
+using System.Windows.Forms;
+using System.IO;
+
+using MetroFramework;
+using MetroFramework.Controls;
+using MetroFramework.Forms;
+using Microsoft.Win32;
+
+using MadMilkman.Ini;
+
+namespace WebAccessCheckFiles
+{
+    public partial class Form1 : MetroForm
+    {
+        int local_idx, target_idx;
+
+        int miss = 0, dismatch = 0, match = 0;
+
+        string appPath = System.IO.Path.GetDirectoryName(Application.ExecutablePath);
+
+        CommonBase baseObj = new CommonBase();
+
+        Transfer transObj = new Transfer();
+
+        public Form1()
+        {
+            InitializeComponent();
+
+            listBoxStandard.DrawMode = DrawMode.OwnerDrawFixed;
+            listBoxStandard.DrawItem += listBox_DrawItem;
+
+            //InitializeLocal();
+        }
+        WaitWnd.WaitWndFun waitForm = new WaitWnd.WaitWndFun();
+
+        void InitializeLocal() {
+
+            //local_idx = 0;
+
+            listBoxLocal.Items.Clear();
+
+            baseObj.szLocalFiles.Clear();
+            baseObj.szLocalChecksum.Clear();
+
+            InitializeLocalAll();
+            //InitializeLocaDLL();
+            //InitializeLocaExe();
+        }
+
+        void InitializeLocaExe() {
+            var filesInfo = new DirectoryInfo(appPath).GetFiles("*.exe");
+
+            string checksum = string.Empty;
+
+            foreach (var file in filesInfo)
+            {
+                checksum = transObj.GetMD5HashFromFile(appPath + "/" + file);
+
+                //SetupIniIP.IniWriteValue("Node", file.Name, checksum, CommonBase.szIniFileName);
+
+                baseObj.szLocalFiles.Add(file.Name);
+                baseObj.szLocalChecksum.Add(checksum);
+
+                listBoxLocal.Items.Add(file.Name);
+
+                local_idx++;
+            }
+
+            //listBoxLocal.DataSource = baseObj.szLocalFiles;
+        }
+
+        void InitializeLocaDLL()
+        {
+            var filesInfo = new DirectoryInfo(appPath).GetFiles("*.dll"); //, SearchOption.AllDirectories
+
+            string checksum = string.Empty;
+
+            foreach (var file in filesInfo)
+            {
+                checksum = transObj.GetMD5HashFromFile(appPath + "/" + file);
+
+                //SetupIniIP.IniWriteValue("Node", file.Name, checksum, CommonBase.szIniFileName);
+
+                baseObj.szLocalFiles.Add(file.Name);
+                baseObj.szLocalChecksum.Add(checksum);
+
+                listBoxLocal.Items.Add(file.Name);
+
+                local_idx++;
+            }
+
+            filesInfo = new DirectoryInfo(appPath + "/" + "driver").GetFiles("*.dll"); //, SearchOption.AllDirectories
+            checksum = string.Empty;
+
+            foreach (var file in filesInfo)
+            {
+                checksum = transObj.GetMD5HashFromFile(appPath + "/driver/" + file);
+
+                //SetupIniIP.IniWriteValue("Node", file.Name, checksum, CommonBase.szIniFileName);
+
+                baseObj.szLocalFiles.Add(file.Name);
+                baseObj.szLocalChecksum.Add(checksum);
+
+                listBoxLocal.Items.Add(file.Name);
+
+                local_idx++;
+            }
+
+            //listBoxLocal.DataSource = baseObj.szLocalFiles;
+        }
+
+        void InitializeLocalAll()
+        {
+            var filesInfo = new DirectoryInfo(appPath).GetFiles("*.*");
+
+            string checksum = string.Empty;
+
+            foreach (var file in filesInfo)
+            {
+                checksum = transObj.GetMD5HashFromFile(appPath + "/" + file);
+
+                //SetupIniIP.IniWriteValue("Node", file.Name, checksum, CommonBase.szIniFileName);
+
+                baseObj.szLocalFiles.Add(file.Name);
+                baseObj.szLocalChecksum.Add(checksum);
+
+                listBoxLocal.Items.Add(file.Name);
+
+                local_idx++;
+            }
+
+            //listBoxLocal.DataSource = baseObj.szLocalFiles;
+        }
+
+        //Create a task to process import data
+        Task ProcessImport(List<string> data, IProgress<ProgressReport> progress)
+        {
+            int index = 1;
+            int totalProgress = data.Count;
+            var progressReport = new ProgressReport();
+
+            miss = 0; dismatch = 0; match = 0;
+
+            //Create a new thread
+            return Task.Run(() =>
+            {
+                baseObj.szFailFiles.Clear();
+
+                for (int i = 0; i < totalProgress; i++) {
+                    for (int j = 0; j< local_idx; j++) {
+
+                        if (baseObj.szLocalFiles[j] == baseObj.szTargetFiles[i])
+                        {
+                            if (baseObj.szLocalChecksum[j] != baseObj.szTargetChecksum[i])
+                            {
+                                baseObj.szFailFiles.Add("(error) " + baseObj.szTargetFiles[i]);
+                                SetupIniIP.IniWriteValue("Dismatch", dismatch.ToString(), baseObj.szTargetFiles[i], CommonBase.szIniLogFileName);
+                                dismatch++;
+                            }
+                            else
+                            {
+                                baseObj.szFailFiles.Add("(match) " + baseObj.szTargetFiles[i]);
+                                //SetupIniIP.IniWriteValue("Match", match.ToString(), baseObj.szTargetFiles[i], CommonBase.szIniLogFileName);
+                                match++;
+                            }
+                            break;
+                        }
+                        else if(j== (local_idx-1) )
+                        {
+                            baseObj.szFailFiles.Add("(miss)  " + baseObj.szTargetFiles[i]);
+                            SetupIniIP.IniWriteValue("Miss", miss.ToString(), baseObj.szTargetFiles[i], CommonBase.szIniLogFileName);
+                            miss ++;
+                        }
+                    }
+                    progressReport.PercentComplete = index++ * 100 / totalProgress;
+                    progress.Report(progressReport);
+                    Thread.Sleep(10);
+                }
+            });
+        }
+
+        Task ProcessDetect() {
+            return Task.Run(() => {
+                var filesInfo = new DirectoryInfo(appPath).GetFiles("*.*");
+
+                string checksum = string.Empty;
+
+                foreach (var file in filesInfo)
+                {
+                    checksum = transObj.GetMD5HashFromFile(appPath + "/" + file);
+
+                    //SetupIniIP.IniWriteValue("Node", file.Name, checksum, CommonBase.szIniFileName);
+
+                    baseObj.szLocalFiles.Add(file.Name);
+                    baseObj.szLocalChecksum.Add(checksum);
+
+                    //listBoxLocal.Items.Add(file.Name);
+
+                    local_idx++;
+                }
+            });
+        }
+        private void listBox_DrawItem(object sender, DrawItemEventArgs e)
+        {
+            if (e.Index >= 0)
+            {
+                e.DrawBackground();
+                Brush mybsh = Brushes.Black;
+               
+                if (listBoxStandard.Items[e.Index].ToString().IndexOf("(match) ") != -1)
+                {
+                    mybsh = Brushes.Green;
+                }
+                else if (listBoxStandard.Items[e.Index].ToString().IndexOf("(error) ") != -1)
+                {
+                    mybsh = Brushes.Red;
+                }
+                else if (listBoxStandard.Items[e.Index].ToString().IndexOf("(miss) ") != -1)
+                {
+                    mybsh = Brushes.Blue;
+                }
+                // 焦点框
+                e.DrawFocusRectangle();
+                //文本 
+                e.Graphics.DrawString(listBoxStandard.Items[e.Index].ToString(), e.Font, mybsh, e.Bounds, StringFormat.GenericDefault);
+            }
+        }
+
+        private async void metroButtonTest_Click(object sender, EventArgs e)
+        {
+            metroProgressBar1.Value = 0;
+            //Init data
+            List<string> list = new List<string>();
+
+            for (int i = 0; i < target_idx; i++){
+                list.Add(i.ToString());
+            }
+
+            var progressReport = new Progress<ProgressReport>();
+
+            progressReport.ProgressChanged += (o, report) =>
+            {
+                //Update your percentage
+                //lblProcess.Text = string.Format("Processing...{0}%", report.PercentComplete);
+                metroProgressBar1.Value = report.PercentComplete;
+                metroProgressBar1.Update();
+            };
+
+            //Process import data
+            await ProcessImport(list, progressReport);
+
+            metroLabelDismatchNumber.Text = dismatch.ToString();
+            metroLabelMatchNumber.Text = match.ToString();
+            metroLabelMissNumber.Text = miss.ToString();
+
+            listBoxStandard.Items.Clear();
+            foreach (var item in baseObj.szFailFiles) {
+                listBoxStandard.Items.Add(item);
+            }
+        }
+
+        private async void metroButtonInit_Click(object sender, EventArgs e)
+        {
+            local_idx = 0;
+            baseObj.szLocalFiles.Clear();
+            baseObj.szTargetChecksum.Clear();
+
+            metroButtonDetect.Enabled = false;
+            metroButtonExport.Enabled = false;
+            metroButtonTest.Enabled = false;
+
+            waitForm.Show(this);
+
+            var detectProgress = new Progress<ProgressReport>();
+
+            listBoxLocal.Items.Clear();
+
+            await ProcessDetect();
+
+            foreach (var item in baseObj.szLocalFiles)
+            {
+                listBoxLocal.Items.Add(item);
+            }
+
+            metroButtonDetect.Enabled = true;
+            metroButtonExport.Enabled = true;
+            metroButtonTest.Enabled = true;
+
+            waitForm.Close();
+            //InitializeLocal();
+        }
+
+        private void metroButtonExport_Click(object sender, EventArgs e)
+        {
+            string value = "123455";
+
+            if (ExportDialog.InputBox("New document", "New document name:", ref value) == DialogResult.OK)
+            {
+                //myDocument.Name = value;
+            }
+
+            //MessageBox.Show("Oh noes!", "My Application", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            for (int i = 0; i< local_idx; i++)
+            {
+                SetupIniIP.IniWriteValue("Node", baseObj.szLocalFiles[i], baseObj.szLocalChecksum[i], CommonBase.szIniExtFileName);
+            }
+        }
+
+        private void metroButtonBrowse_Click(object sender, EventArgs e)
+        {
+            DialogResult result = openFileDialog1.ShowDialog(); // Show the dialog.
+            if (result == DialogResult.OK) // Test result.
+            {
+                listBoxStandard.Items.Clear();
+
+                baseObj.szTargetFiles.Clear();
+                baseObj.szTargetChecksum.Clear();
+
+                string file = openFileDialog1.FileName;
+                try
+                {
+                    IniFile ini = new IniFile();
+                    ini.Load(file);
+
+                    target_idx = 0;
+
+                    foreach (IniSection section in ini.Sections)
+                    {
+                        foreach (IniKey key in section.Keys)
+                        {
+                            string sectionName = section.Name;
+                            string keyName = key.Name;
+                            string keyValue = key.Value;
+
+                            listBoxStandard.Items.Add(keyName);
+
+                            baseObj.szTargetFiles.Add(keyName);
+                            baseObj.szTargetChecksum.Add(keyValue);
+
+                            target_idx++;
+                        }
+                    }
+                }
+                catch (IOException)
+                {
+                }
+            }
+        }
+
+    }
+}
